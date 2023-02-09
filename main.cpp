@@ -1,12 +1,10 @@
-#include <string>
-#include <stdio.h>
-#include <sstream>
-#include <queue>
-#include <vector>
 #include <map>
-#include <iostream>
-#include <fstream>
 #include <cmath>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <stdio.h>
 #include "data.h"
 
 double roundTo2(double value) {
@@ -23,12 +21,10 @@ void yearInReview(const int year, const int numTrades, const double commissionUS
   printf("Total commission CAD: $%.2lf\n", roundTo2(commissionCAD * -1));
   printf("Dividends CAD: $%.2lf\n", roundTo2(divCAD));
   printf("Net gain CAD: $%.2lf\n", roundTo2(gainWOutCommissionCAD + commissionCAD + divCAD));
-
   printf("\n###\n\n\n");
 }
 
 std::string parseDate(std::string &str) {
-  // format: year-month-day 12:00:00 AM
   return str.substr(0, 10);
 }
 
@@ -51,7 +47,7 @@ bool parseLine(std::stringstream &ss, Data &data) {
   data.avgPrice = std::stod(split[4]);
   data.quantity = std::stoi(split[3]);
   data.commission = std::stod(split[6]);
-  data.accountType = split[9];
+  data.accountType = split[10];
   data.currency = split[8];
   data.action = split[1];
   data.symbol = split[2];
@@ -66,7 +62,7 @@ int main() {
   if (!std::getline(infile, line)) {
     return 1;
   }
-  std::cout << "\"Gross\" does not include commission\n\n";
+  printf("\"Gross\" does not include commission\n\n");
   int year = 0;
   double commissionUSD = 0, divUSD = 0, gainWOutCommissionUSD = 0;
   double commissionCAD = 0, divCAD = 0, gainWOutCommissionCAD = 0;
@@ -78,15 +74,15 @@ int main() {
     }
     if (data.action.compare("Sell") == 0) {
       if (data.currency.compare("USD") == 0) {
-        gainWOutCommissionUSD += data.dataSell(map);
+        gainWOutCommissionUSD += dataSell(data, map);
         commissionUSD += data.commission;
       } else {
-        gainWOutCommissionCAD += data.dataSell(map);
+        gainWOutCommissionCAD += dataSell(data, map);
         commissionCAD += data.commission;
       }
       ++i;
     } else if (data.action.compare("Buy") == 0) {
-      data.dataBuy(map);
+      dataBuy(data, map);
       if (data.currency.compare("USD") == 0) {
         commissionUSD += data.commission;
       } else {
@@ -94,7 +90,7 @@ int main() {
       }
       ++i;
     } else if (data.action.compare("DIV") == 0) {
-      data.dataDiv();
+      dataDiv(data);
       if (data.currency.compare("USD") == 0) {
         divUSD += data.div;
       } else {
